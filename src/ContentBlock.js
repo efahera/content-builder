@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'; 
 import { useDrag, useDrop } from 'react-dnd'; 
 import styled from 'styled-components'; 
+import ComponentType from './ComponentType';
 
  
 const BlockContainer = styled.div` 
@@ -36,14 +37,28 @@ const ControlButton = styled.button`
     } 
 `; 
  
-const ContentBlock = ({ block, index, moveBlock, updateBlock, removeBlock, isPreview  }) => { // added isPreview 
+const ContentBlock = ({ block, index, moveBlock, updateBlock, removeBlock, isPreview  }) => {
     const [isEditing, setIsEditing] = useState(false); 
-    const [content, setContent] = useState(block.content || ''); 
+    // const [localContent, setLocalContent] = useState(block?.props?.content || '');
+    const [localContent, setLocalContent] = useState(block.props?.content ?? '');
 
-    // useEffect(() => {   // added
-    // setContent(block.content || '');   // added
-    // }, [block.content]);   // added
     
+    useEffect(() => {
+    setLocalContent(block.content || '');
+    }, [block.content]);
+    
+    if (!block.props?.content) {
+    console.warn('Block missing content:', block);
+    }
+
+    // useEffect(() => {
+    // const typesThatRequireContent = ['title', 'header', 'text', 'boldtext', 'bulletpoints'];
+
+    // if (typesThatRequireContent.includes(block.type) && (block.content === undefined || block.content === null)) {
+    //     console.warn("Block missing content:", block);
+    // }
+    // }, []);
+
     const ref = React.useRef(null); 
     
     const [{ isDragging }, drag] = useDrag({ 
@@ -69,258 +84,298 @@ const ContentBlock = ({ block, index, moveBlock, updateBlock, removeBlock, isPre
     }); 
    
     drag(drop(ref)); 
-   
-    const handleSave = () => { 
-        updateBlock(block.id, { content }); 
-        setIsEditing(false); 
-    }; 
-   
-    const renderBlockContent = () => { 
-        switch (block.type) { 
-            case 'text': 
-                return isEditing ? ( 
-                    <div> 
-                        <textarea 
-                        value={content} 
-                        onChange={(e) => setContent(e.target.value)} 
-                        style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
-                        /> 
-                        <button onClick={handleSave}>Save</button> 
-                    </div> 
-                ) : ( 
+    
+    const handleChange = (updatedProps) => {
+        setLocalContent(updatedProps.content);
+    };
 
-                    <div 
-                    onClick={() => !isPreview && setIsEditing(true)}
-                    style={{ textAlign: 'left' }}
-                    > 
-                        {content || 'Double click to edit text'} 
-                    </div> 
-                );
+    const handleSave = () => {
+        updateBlock(block.id, { ...block.props, content: localContent });
+        setIsEditing(false);
+    };
 
-            case 'boldtext': 
-                return isEditing ? ( 
-                    <div> 
-                        <textarea 
-                        value={content} 
-                        onChange={(e) => setContent(e.target.value)} 
-                        style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
-                        /> 
-                        <button onClick={handleSave}>Save</button> 
-                    </div> 
-                ) : ( 
+    // const handleBlockChange = (blockId, newProps) => {
+    // setBlocks(prevBlocks =>
+    //     prevBlocks.map(block =>
+    //     block.id === blockId
+    //         ? { ...block, props: { ...block.props, ...newProps } }
+    //         : block
+    //     )
+    // );
+    // };
 
-                    <div 
-                    onClick={() => !isPreview && setIsEditing(true)}
-                    style={{ fontWeight: 'bold', textAlign: 'left' }}
-                    >
-                    {content || 'Double click to edit text'}
-                    </div>
-                );
+    // const renderBlockContent = () => { 
+    //     switch (block.type) { 
+    //         case 'text': 
+    //             return isEditing ? ( 
+    //                 <div> 
+    //                     <textarea 
+    //                     value={content} 
+    //                     onChange={(e) => {
+    //                         setContent(e.target.value);
+    //                         updateBlock(block.id, { content: e.target.value });
+    //                     }}
+    //                     style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
+    //                     /> 
+    //                     <button onClick={handleSave}>Save</button> 
+    //                 </div> 
+    //             ) : ( 
 
-            case 'italictext': 
-                return isEditing ? ( 
-                    <div> 
-                        <textarea 
-                        value={content} 
-                        onChange={(e) => setContent(e.target.value)} 
-                        style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
-                        /> 
-                        <button onClick={handleSave}>Save</button> 
-                    </div> 
-                ) : ( 
+    //                 <div 
+    //                     onClick={() => !isPreview && setIsEditing(true)}
+    //                     style={{ textAlign: 'left' }}
+    //                     > 
+    //                         {content || 'Double click to edit text'} 
+    //                 </div> 
+    //             );
 
-                    <div 
-                    onClick={() => !isPreview && setIsEditing(true)}
-                    style={{ fontStyle: 'italic', textAlign: 'left' }}
-                    >
-                    {content || 'Double click to edit text'}
-                    </div>
-                );
+    //         case 'boldtext': 
+    //             return isEditing ? ( 
+    //                 <div> 
+    //                     <textarea 
+    //                     value={content} 
+    //                     onChange={(e) => {
+    //                         setContent(e.target.value);
+    //                         updateBlock(block.id, { content: e.target.value });
+    //                     }}
+    //                     style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
+    //                     /> 
+    //                     <button onClick={handleSave}>Save</button> 
+    //                 </div> 
+    //             ) : ( 
 
-            case 'bulletpoints':
-                return isEditing ? (
-                    <div>
-                    <textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Enter bullet points, one per line"
-                        style={{ width: '100%', minHeight: '100px', textAlign: 'left' }}
-                    />
-                    <button onClick={handleSave}>Save</button>
-                    </div>
-                ) : (
-                    <ul 
-                    onClick={() => !isPreview && setIsEditing(true)}
-                    style={{ textAlign: 'left' }}
-                    >
-                        {content.split('\n').map((line, index) => (
-                            <li key={index}>{line}</li>
-                        ))}
-                    </ul>
-                );
+    //                 <div 
+    //                 onClick={() => !isPreview && setIsEditing(true)}
+    //                 style={{ fontWeight: 'bold', textAlign: 'left' }}
+    //                 >
+    //                 {content || 'Double click to edit text'}
+    //                 </div>
+    //             );
 
-            case 'numberedlist':
-                return isEditing ? (
-                    <div>
-                    <textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Enter ordered list items, one per line"
-                        style={{ width: '100%', minHeight: '100px', textAlign: 'left' }}
-                    />
-                    <button onClick={handleSave}>Save</button>
-                    </div>
-                ) : (
-                    <ol
-                    onClick={() => !isPreview && setIsEditing(true)}
-                    style={{
-                        textAlign: 'left',
-                        paddingLeft: '20px',
-                        margin: 0,
-                    }}
-                    >
-                    {content.split('\n').map((line, index) => (
-                        <li key={index}>{line}</li>
-                    ))}
-                    </ol>
-                );
+    //         case 'italictext': 
+    //             return isEditing ? ( 
+    //                 <div> 
+    //                     <textarea 
+    //                     value={content} 
+    //                     onChange={(e) => {
+    //                         setContent(e.target.value);
+    //                         updateBlock(block.id, { content: e.target.value });
+    //                     }}
+    //                     style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
+    //                     /> 
+    //                     <button onClick={handleSave}>Save</button> 
+    //                 </div> 
+    //             ) : ( 
 
-            case 'title': 
-                return isEditing ? ( 
-                    <div> 
-                        <textarea 
-                        value={content} 
-                        onChange={(e) => setContent(e.target.value)} 
-                        style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
-                        /> 
-                        <button onClick={handleSave}>Save</button> 
-                    </div> 
-                ) : ( 
+    //                 <div 
+    //                 onClick={() => !isPreview && setIsEditing(true)}
+    //                 style={{ fontStyle: 'italic', textAlign: 'left' }}
+    //                 >
+    //                 {content || 'Double click to edit text'}
+    //                 </div>
+    //             );
 
-                    <div 
-                    onClick={() => !isPreview && setIsEditing(true)}
-                    style={{ fontSize: '26px', fontWeight: 'bold', textAlign: 'left', textDecoration: 'underline' }}
-                    >
-                    {content || 'Double click to edit title'}
-                    </div>
-                );
+    //         case 'bulletpoints':
+    //             return isEditing ? (
+    //                 <div>
+    //                 <textarea
+    //                     value={content}
+    //                     onChange={(e) => {
+    //                         setContent(e.target.value);
+    //                         updateBlock(block.id, { content: e.target.value });
+    //                     }}
+    //                     placeholder="Enter bullet points, one per line"
+    //                     style={{ width: '100%', minHeight: '100px', textAlign: 'left' }}
+    //                 />
+    //                 <button onClick={handleSave}>Save</button>
+    //                 </div>
+    //             ) : (
+    //                 <ul 
+    //                 onClick={() => !isPreview && setIsEditing(true)}
+    //                 style={{ textAlign: 'left' }}
+    //                 >
+    //                     {content.split('\n').map((line, index) => (
+    //                         <li key={index}>{line}</li>
+    //                     ))}
+    //                 </ul>
+    //             );
 
-            case 'header': 
-                return isEditing ? ( 
-                    <div> 
-                        <textarea 
-                        value={content} 
-                        onChange={(e) => setContent(e.target.value)} 
-                        style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
-                        /> 
-                        <button onClick={handleSave}>Save</button> 
-                    </div> 
-                ) : ( 
+    //         case 'numberedlist':
+    //             return isEditing ? (
+    //                 <div>
+    //                 <textarea
+    //                     value={content}
+    //                     onChange={(e) => {
+    //                         setContent(e.target.value);
+    //                         updateBlock(block.id, { content: e.target.value });
+    //                     }}
+    //                     placeholder="Enter ordered list items, one per line"
+    //                     style={{ width: '100%', minHeight: '100px', textAlign: 'left' }}
+    //                 />
+    //                 <button onClick={handleSave}>Save</button>
+    //                 </div>
+    //             ) : (
+    //                 <ol
+    //                 onClick={() => !isPreview && setIsEditing(true)}
+    //                 style={{
+    //                     textAlign: 'left',
+    //                     paddingLeft: '20px',
+    //                     margin: 0,
+    //                 }}
+    //                 >
+    //                 {content.split('\n').map((line, index) => (
+    //                     <li key={index}>{line}</li>
+    //                 ))}
+    //                 </ol>
+    //             );
 
-                    <div 
-                    onClick={() => !isPreview && setIsEditing(true)}
-                    style={{ fontSize: '20px', fontWeight: 'bold', textAlign: 'left', textDecoration: 'underline' }}
-                    >
-                    {content || 'Double click to edit header'}
-                    </div>
-                );
+    //         case 'title': 
+    //             return isEditing ? ( 
+    //                 <div> 
+    //                     <textarea 
+    //                     value={content} 
+    //                     onChange={(e) => {
+    //                         setContent(e.target.value);
+    //                         updateBlock(block.id, { content: e.target.value });
+    //                     }}
+    //                     style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
+    //                     /> 
+    //                     <button onClick={handleSave}>Save</button> 
+    //                 </div> 
+    //             ) : ( 
 
-            case 'subheader': 
-                return isEditing ? ( 
-                    <div> 
-                        <textarea 
-                        value={content} 
-                        onChange={(e) => setContent(e.target.value)} 
-                        style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
-                        /> 
-                        <button onClick={handleSave}>Save</button> 
-                    </div> 
-                ) : ( 
+    //                 <div 
+    //                 onClick={() => !isPreview && setIsEditing(true)}
+    //                 style={{ fontSize: '26px', fontWeight: 'bold', textAlign: 'left', textDecoration: 'underline' }}
+    //                 >
+    //                 {content || 'Double click to edit title'}
+    //                 </div>
+    //             );
 
-                    <div 
-                    onClick={() => !isPreview && setIsEditing(true)}
-                    style={{ fontSize: '16px', fontWeight: 'bold', textAlign: 'left' }}
-                    >
-                    {content || 'Double click to edit subheader'}
-                    </div>
-                );
+    //         case 'header': 
+    //             return isEditing ? ( 
+    //                 <div> 
+    //                     <textarea 
+    //                     value={content} 
+    //                     onChange={(e) => {
+    //                         setContent(e.target.value);
+    //                         updateBlock(block.id, { content: e.target.value });
+    //                     }}
+    //                     style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
+    //                     /> 
+    //                     <button onClick={handleSave}>Save</button> 
+    //                 </div> 
+    //             ) : ( 
 
-            case 'image': 
-                return ( 
-                    <div> 
-                        {content ? ( 
-                        <img src={content} alt="Content" style={{ maxWidth: '500px', display: 'flex', justifyContent: 'left' }} />
-                        ) : ( 
-                        <div> 
-                            <input 
-                            type="file" 
-                            onChange={(e) => { 
-                                const file = e.target.files[0]; 
-                                if (file) { 
-                                const reader = new FileReader(); 
-                                reader.onload = (event) => { 
-                                    updateBlock(block.id, { content: event.target.result }); 
-                                }; 
-                                reader.readAsDataURL(file); 
-                                } 
-                            }} 
-                            /> 
-                        </div> 
-                        )} 
-                    </div> 
-                ); 
+    //                 <div 
+    //                 onClick={() => !isPreview && setIsEditing(true)}
+    //                 style={{ fontSize: '20px', fontWeight: 'bold', textAlign: 'left', textDecoration: 'underline' }}
+    //                 >
+    //                 {content || 'Double click to edit header'}
+    //                 </div>
+    //             );
 
-            case 'button': 
-                return ( 
-                <button style={{ padding: '10px 20px', background: '#1890ff', color: 'white', border: 'none' }}> 
-                    {content || 'Click me'} 
-                </button> 
-                ); 
+    //         case 'subheader': 
+    //             return isEditing ? ( 
+    //                 <div> 
+    //                     <textarea 
+    //                     value={content} 
+    //                     onChange={(e) => {
+    //                         setContent(e.target.value);
+    //                         updateBlock(block.id, { content: e.target.value });
+    //                     }}
+    //                     style={{ width: '100%', minHeight: '100px', textAlign: 'left' }} 
+    //                     /> 
+    //                     <button onClick={handleSave}>Save</button> 
+    //                 </div> 
+    //             ) : ( 
 
-            case 'video':
-                return isEditing ? (
-                    <div>
-                    <input
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="Paste YouTube embed URL"
-                        style={{ width: '100%' }}
-                    />
-                    <button onClick={handleSave}>Save</button>
-                    </div>
-                ) : (
-                    <div onClick={() => setIsEditing(true)}>
-                    {content ? (
-                        <iframe
-                        width="100%"
-                        height="200"
-                        src={content}
-                        frameBorder="0"
-                        allowFullScreen
-                        title="Video"
-                        />
-                    ) : (
-                        <p>Click to add video URL</p>
-                    )}
-                    </div>
-                );
+    //                 <div 
+    //                 onClick={() => !isPreview && setIsEditing(true)}
+    //                 style={{ fontSize: '16px', fontWeight: 'bold', textAlign: 'left' }}
+    //                 >
+    //                 {content || 'Double click to edit subheader'}
+    //                 </div>
+    //             );
+
+    //         case 'image': 
+    //             return ( 
+    //                 <div> 
+    //                     {content ? ( 
+    //                     <img src={content} alt="Content" style={{ maxWidth: '500px', display: 'flex', justifyContent: 'left' }} />
+    //                     ) : ( 
+    //                     <div> 
+    //                         <input 
+    //                         type="file" 
+    //                         onChange={(e) => { 
+    //                             const file = e.target.files[0]; 
+    //                             if (file) { 
+    //                             const reader = new FileReader(); 
+    //                             reader.onload = (event) => { 
+    //                                 const imageData = event.target.result;
+    //                                 setContent(imageData);
+    //                                 updateBlock(block.id, { content: imageData });
+    //                             }; 
+    //                             reader.readAsDataURL(file); 
+    //                             } 
+    //                         }} 
+    //                         /> 
+    //                     </div> 
+    //                     )} 
+    //                 </div> 
+    //             ); 
+
+    //         case 'button': 
+    //             return ( 
+    //             <button style={{ padding: '10px 20px', background: '#1890ff', color: 'white', border: 'none' }}> 
+    //                 {content || 'Click me'} 
+    //             </button> 
+    //             ); 
+
+    //         case 'video':
+    //             return isEditing ? (
+    //                 <div>
+    //                 <input
+    //                     value={content}
+    //                     onChange={(e) => setContent(e.target.value)}
+    //                     placeholder="Paste YouTube embed URL"
+    //                     style={{ width: '100%' }}
+    //                 />
+    //                 <button onClick={handleSave}>Save</button>
+    //                 </div>
+    //             ) : (
+    //                 <div onClick={() => setIsEditing(true)}>
+    //                 {content ? (
+    //                     <iframe
+    //                     width="100%"
+    //                     height="200"
+    //                     src={content}
+    //                     frameBorder="0"
+    //                     allowFullScreen
+    //                     title="Video"
+    //                     />
+    //                 ) : (
+    //                     <p>Click to add video URL</p>
+    //                 )}
+    //                 </div>
+    //             );
             
-            case 'divider':
-                return <hr style={{ borderTop: '1px solid #ccc' }} />;
+    //         case 'divider':
+    //             return <hr style={{ borderTop: '1px solid #ccc' }} />;
 
-            case 'gap 10px':
-                return <div style={{ height: '10px' }} />;
+    //         case 'gap 10px':
+    //             return <div style={{ height: '10px' }} />;
 
-            case 'gap 20px':
-                return <div style={{ height: '20px' }} />;
+    //         case 'gap 20px':
+    //             return <div style={{ height: '20px' }} />;
 
-            case 'gap 30px':
-                return <div style={{ height: '30px' }} />;
+    //         case 'gap 30px':
+    //             return <div style={{ height: '30px' }} />;
 
-            default: 
-            return <div>{block.type} element</div>; 
-        } 
-    }; 
+    //         default: 
+    //         return <div>{block.type} element</div>; 
+    //     } 
+    // }; 
    
   return ( 
         <BlockContainer 
@@ -340,7 +395,15 @@ const ContentBlock = ({ block, index, moveBlock, updateBlock, removeBlock, isPre
             </BlockControls> 
         )}
 
-        {renderBlockContent()} 
+        <ComponentType
+            type={block.type}
+            props={{ content: localContent }}
+            isEditing={isEditing}
+            onChange={handleChange}            
+            onSave={handleSave}
+            setIsEditing={setIsEditing}
+            isPreview={isPreview}
+        />
         </BlockContainer> 
     ); 
 }; 

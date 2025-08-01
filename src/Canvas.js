@@ -20,11 +20,6 @@ const CanvasDropArea = styled.div`
 const Canvas = ({ blocks, addBlock, moveBlock, updateBlock, removeBlock, isPreview  }) => { // added addBlock, isPreview 
     const [{ isOver }, drop] = useDrop(() => ({ 
         accept: ['toolbox-item', 'canvas-block'], 
-        // drop: (item, monitor) => { 
-        // if (monitor.getItemType() === 'toolbox-item') { 
-        //     return { action: 'add' }; 
-        // } 
-        // }, 
         
         drop: (item, monitor) => {                          // added
         const didDrop = monitor.didDrop();                  // added
@@ -40,23 +35,27 @@ const Canvas = ({ blocks, addBlock, moveBlock, updateBlock, removeBlock, isPrevi
         }), 
   })); 
 
+    const handleBlockChange = (blockId, newProps) => {
+        updateBlock(blockId, newProps);
+    };
+
     return ( 
         <CanvasContainer> 
         <h2>Content Canvas</h2> 
-        <CanvasDropArea ref={drop} isOver={isOver}> 
+        <CanvasDropArea ref={drop} $isOver={isOver}> 
             {blocks.length === 0 && !isOver && ( 
             <p>Drag elements here to build your content</p> 
             )} 
             
             {blocks.map((block, index) => ( 
             <ContentBlock 
-                key={block.id} 
-                index={index} 
-                block={block} 
-                moveBlock={moveBlock} 
-                updateBlock={updateBlock} 
-                removeBlock={removeBlock} 
-                isPreview={isPreview}
+                key={block.id}
+                type={block.type}
+                props={block.props}
+                block={block}
+                onChange={(newProps) => handleBlockChange(block.id, newProps)}
+                updateBlock={updateBlock}
+                removeBlock={removeBlock}
             /> 
             ))} 
         </CanvasDropArea> 
