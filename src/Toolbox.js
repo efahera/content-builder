@@ -12,7 +12,7 @@ const ToolboxItem = styled.div`
  
 const ToolboxContainer = styled.div` 
     width: 250px; 
-    height: 100%;
+    height: auto;
     padding: 20px; 
     background: #e9e9e9; 
     border-right: 1px solid #ddd; 
@@ -20,21 +20,22 @@ const ToolboxContainer = styled.div`
  
 const Toolbox = () => { 
     const elements = [ 
+        { type: 'title', name: 'Title' }, 
+        { type: 'header', name: 'Header' }, 
+        { type: 'subheader', name: 'Subheader' }, 
         { type: 'text', name: 'Text Block' }, 
         { type: 'boldtext', name: 'Bold Text Block' }, 
         { type: 'italictext', name: 'Cursive Text Block' }, 
         { type: 'bulletpoints', name: 'Bullet Points' },
         { type: 'numberedlist', name: 'Numbered List' },
-        { type: 'title', name: 'Title' }, 
-        { type: 'header', name: 'Header' }, 
-        { type: 'subheader', name: 'Subheader' }, 
         { type: 'image', name: 'Image' }, 
+        { type: 'divider', name: 'Divider' }, 
+        { type: 'gap', name: 'Break' }, 
+
         // { type: 'button', name: 'Button' }, 
         // { type: 'video', name: 'Video Embed' }, 
-        { type: 'divider', name: 'Divider' }, 
-        { type: 'gap 10px', name: '10px' }, 
-        { type: 'gap 20px', name: '20px' }, 
-        { type: 'gap 30px', name: '30px' }, 
+        // { type: 'gap 20px', name: '20px' }, 
+        // { type: 'gap 30px', name: '30px' }, 
     ]; 
  
     return ( 

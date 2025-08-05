@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; 
+import { useState } from 'react'; 
 import { DndProvider } from 'react-dnd'; 
 import { HTML5Backend } from 'react-dnd-html5-backend'; 
 import Toolbox from './Toolbox'; 
@@ -10,30 +10,19 @@ const BuilderContainer = styled.div`
     height: 100%; 
 `; 
 
-const PreviewContainer = styled.div` 
+const SideContainer = styled.div` 
     padding: 20px; 
     background: #f9f9f9; 
     min-height: 100%; 
 `; 
 
-const ContentBuilder = () => { 
-   
-    const [blocks, setBlocks] = useState(() => {                        // added
-    const saved = localStorage.getItem('content_blocks');               // added
-    return saved ? JSON.parse(saved) : [];                              // added
-    });                                                                 // added
+// const LOCAL_STORAGE_KEY = `content_blocks_page_${PAGE_ID}`;
 
-    // useEffect(() => {                                                   // added
-    // localStorage.setItem('content_blocks', JSON.stringify(blocks));     // added
-    // }, [blocks]);                                                       // added
+const ContentBuilder = () => { 
+    const [blocks, setBlocks] = useState([]);
 
     const addBlock = (block) => {
-        const safeBlock = {
-            ...block,
-            id: Date.now() + Math.random(),
-            props: block.props || { content: '' },
-        };
-        setBlocks(prev => [...prev, safeBlock]);
+        setBlocks(prev => [...prev, { ...block, id: Date.now() + Math.random() }]);
     };
 
     const moveBlock = (dragIndex, hoverIndex) => { 
@@ -51,106 +40,150 @@ const ContentBuilder = () => {
     }; 
     
     const removeBlock = (id) => { 
-        setBlocks(prevBlocks => {
-            const updated = prevBlocks.filter(block => block.id !== id);
-            console.log("After deletion, blocks:", updated);
-            saveToBackend(updated);
-            return updated;
-        });
+        setBlocks(blocks.filter(block => block.id !== id)); 
     }; 
 
+    // clear page on backend
+    const clearPage = async () => {
+        setBlocks([]);
+        // localStorage.removeItem(LOCAL_STORAGE_KEY);
 
-    const [isPreview, setIsPreview] = useState(false);
-
-    const saveToBackend = async () => {
         try {
-            const content = JSON.stringify(blocks);
-            const res = await fetch("http://localhost:8000/api/pages/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    title: "Landing Page",
-                    content: content
-                })
-            });
-            if (!res.ok) throw new Error("Failed to save to backend");
-            console.log("After saving, blocks:", blocks);
-
-            alert("Page saved!");
-        } catch (err) {
-            console.error("Error saving:", err);
+        await fetch(`http://localhost:8000/api/pages/`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: 'Landing Page',
+                content: [],
+            }),
+        });
+        } catch (error) {
+            console.error('Failed to clear on backend:', error);
         }
     };
 
+    const saveToBackend = async () => {
+        try {
+            await fetch(`http://localhost:8000/api/pages/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: 'Landing Page',
+                    content: blocks,
+                }),
+            });
+            
+            console.log("After saving, blocks:", blocks);
+            alert("Page saved!");
+
+        } catch (error) {
+            console.error('Failed to sync to backend:', error);
+        }
+        };
+
     const loadFromBackend = async () => {
         try {
-            const res = await fetch("http://localhost:8000/api/pages/", {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
+            const res = await fetch(`http://localhost:8000/api/pages/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             });
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(`Failed to save to backend: ${errorText}`);
-            }
-            
-            console.log("Retrieved blocks:", blocks);
-
+            if (!res.ok) throw new Error("Fetch failed");
             const data = await res.json();
-            const page = data.find(p => p.title === "Landing Page");
+            const parsed = typeof data.content === 'string' ? JSON.parse(data.content) : data.content;
+            setBlocks(parsed || []);
+            console.log("Retrieved blocks:", parsed);
+            alert("Page retrieved!");
 
-            if (!page) {
-                alert("Page not found!");
-                return;
-            }
-
-            const parsedContent = JSON.parse(page.content);
-            setBlocks(parsedContent);
-            alert("Page retrieved from backend!");
         } catch (err) {
             console.error("Error retrieving page:", err);
         }
     };
 
+    const [previewMode, setPreviewMode] = useState(false);
+
+    // retrieve from backend
+    // useEffect(() => {
+    //     const fetchBlocks = async () => {
+    //         try {
+    //             // retrieve from database
+    //             const res = await fetch(`http://localhost:8000/api/pages/`);
+    //             if (!res.ok) throw new Error('Backend fetch failed');
+    //             const data = await res.json();
+    //             const parsed = typeof data.content === 'string' ? JSON.parse(data.content) : data.content;
+    //             setBlocks(parsed || []);
+    //             // localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parsed || [])); // sync to localStorage
+    //         } catch (err) {
+    //         }
+    //     };
+
+    //     fetchBlocks();
+    // }, []);
+
+
+    // const loadFromBackend = async () => {
+    //     try {
+    //         await fetch(`http://localhost:8000/api/pages/`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //         });
+            
+    //         console.log("Retrieved blocks:", blocks);
+    //         alert("Page retrieved!");
+
+    //     } catch (err) {
+    //         console.error("Error retrieving page:", err);
+    //     }
+    // };
+
     return ( 
         <DndProvider backend={HTML5Backend}> 
-        <BuilderContainer> 
-            <Toolbox /> 
+            <BuilderContainer> 
+                <Toolbox /> 
+                <Canvas 
+                blocks={blocks}  
+                addBlock={addBlock}
+                moveBlock={moveBlock} 
+                updateBlock={updateBlock} 
+                removeBlock={removeBlock} 
+                clearPage={clearPage}
+                previewMode={previewMode}
+                /> 
 
-            <Canvas 
-            blocks={blocks}  
-            addBlock={addBlock}
-            moveBlock={moveBlock} 
-            updateBlock={updateBlock} 
-            removeBlock={removeBlock} 
-            isPreview={isPreview}
-            /> 
+                <SideContainer>
+                    <div style={{display: 'flex', flexDirection: 'column'}}>
+                        <button 
+                            style={{ marginTop: '10px' }} 
+                            onClick={() => setPreviewMode(!previewMode)}>
+                                {previewMode ? 'Exit Preview' : 'Preview'} 
+                        </button> 
 
-            <PreviewContainer>
-                <div style={{display: 'flex', flexDirection: 'column'}}>
-                    <button 
-                        style={{ marginTop: '10px' }} 
-                        onClick={() => setIsPreview(prev => !prev)}>
-                            {isPreview  ? 'Exit Preview' : 'Preview'} 
-                    </button> 
+                        <button 
+                            style={{ marginTop: '10px' }} 
+                            onClick={clearPage}>
+                                Clear Page
+                        </button>
 
-                    <button 
-                        style={{ marginTop: '10px' }} 
-                        onClick={saveToBackend}>
-                            Save to Backend
-                    </button>
+                        <button 
+                            style={{ marginTop: '10px' }} 
+                            onClick={saveToBackend}>
+                                Save to Backend
+                        </button>
 
-                    <button 
-                        style={{ marginTop: '10px' }} 
-                        onClick={loadFromBackend}>
-                            Load from Backend
-                    </button>
-                </div>
-            </PreviewContainer>
-
-
-        </BuilderContainer> 
-
+                        <button 
+                            style={{ marginTop: '10px' }} 
+                            onClick={loadFromBackend}>
+                                Load from Backend
+                        </button>
+                    </div>
+                </SideContainer>
+            </BuilderContainer> 
         </DndProvider> 
         
     ); 

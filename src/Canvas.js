@@ -17,48 +17,44 @@ const CanvasDropArea = styled.div`
     padding: 50px; 
 `;
 
-const Canvas = ({ blocks, addBlock, moveBlock, updateBlock, removeBlock, isPreview  }) => { // added addBlock, isPreview 
+const Canvas = ({ blocks, addBlock, moveBlock, updateBlock, removeBlock, previewMode  }) => { 
     const [{ isOver }, drop] = useDrop(() => ({ 
         accept: ['toolbox-item', 'canvas-block'], 
         
-        drop: (item, monitor) => {                          // added
-        const didDrop = monitor.didDrop();                  // added
-        if (didDrop) return;                                // added
+        drop: (item, monitor) => {
+            const didDrop = monitor.didDrop();
+            if (didDrop) return;
 
-        if (monitor.getItemType() === 'toolbox-item') {     // added
-            addBlock({ type: item.element.type });          // added
-        }                                                   // added
-        },                                                  // added
+            if (monitor.getItemType() === 'toolbox-item') {
+                addBlock({ type: item.element.type });
+            }
+        },
 
         collect: (monitor) => ({ 
         isOver: !!monitor.isOver(), 
         }), 
-  })); 
-
-    const handleBlockChange = (blockId, newProps) => {
-        updateBlock(blockId, newProps);
-    };
+    })); 
 
     return ( 
         <CanvasContainer> 
         <h2>Content Canvas</h2> 
-        <CanvasDropArea ref={drop} $isOver={isOver}> 
-            {blocks.length === 0 && !isOver && ( 
-            <p>Drag elements here to build your content</p> 
-            )} 
-            
-            {blocks.map((block, index) => ( 
-            <ContentBlock 
-                key={block.id}
-                type={block.type}
-                props={block.props}
-                block={block}
-                onChange={(newProps) => handleBlockChange(block.id, newProps)}
-                updateBlock={updateBlock}
-                removeBlock={removeBlock}
-            /> 
-            ))} 
-        </CanvasDropArea> 
+            <CanvasDropArea ref={drop} $isOver={isOver}> 
+                {blocks.length === 0 && !isOver && ( 
+                <p>Drag elements here to build your content</p> 
+                )} 
+                
+                {blocks.map((block, index) => ( 
+                <ContentBlock 
+                    key={block.id}
+                    block={block}
+                    index={index}
+                    moveBlock={moveBlock}
+                    updateBlock={updateBlock}
+                    removeBlock={removeBlock}
+                    previewMode={previewMode}
+                />
+                ))} 
+            </CanvasDropArea> 
         </CanvasContainer> 
     );
 
