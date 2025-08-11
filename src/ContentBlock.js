@@ -110,6 +110,8 @@ const ContentBlock = ({ block, index, moveBlock, updateBlock, removeBlock, previ
             onChange={handleChange}            
             onSave={handleSave}
             setIsEditing={setIsEditing}
+            block={block}
+            updateBlock={updateBlock}
         />
         </BlockContainer> 
     ); 

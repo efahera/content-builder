@@ -31,8 +31,7 @@ const Toolbox = () => {
         { type: 'image', name: 'Image' }, 
         { type: 'divider', name: 'Divider' }, 
         { type: 'gap', name: 'Break' }, 
-
-        // { type: 'button', name: 'Button' }, 
+        // { type: 'emoji', name: 'Emoji' }, 
         // { type: 'video', name: 'Video Embed' }, 
         // { type: 'gap 20px', name: '20px' }, 
         // { type: 'gap 30px', name: '30px' }, 

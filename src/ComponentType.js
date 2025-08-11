@@ -1,4 +1,4 @@
-const ComponentType = ({ type, content = '', isEditing, previewMode, setIsEditing, onSave, onChange }) => {
+const ComponentType = ({ block, updateBlock, type, content = '', isEditing, previewMode, setIsEditing, onSave, onChange, handleSave }) => {
 
     const renderTextarea = () => (
         <>
@@ -111,15 +111,37 @@ const ComponentType = ({ type, content = '', isEditing, previewMode, setIsEditin
                 </div>
             );
 
-        case 'image':
-            return <img src={content} alt="" style={{ maxWidth: '100%' }} />;
+        case 'image': 
+            return ( 
+                <div> 
+                    {content ? ( 
+                        <img src={content} alt="Content" style={{ maxWidth: '100%' }} /> ) : ( 
+                            <div> 
+                                <input 
+                                type="file" 
+                                onChange={(e) => { 
+                                    const file = e.target.files[0]; 
+                                    if (file) { 
+                                        const reader = new FileReader(); 
+                                        reader.onload = (event) => { 
+                                            updateBlock(block.id, { content: event.target.result }); 
+                                            // updateBlock(id, { content: event.target.result }); 
+                                        }; 
+                                        reader.readAsDataURL(file); 
+                                    } 
+                                }} 
+                                /> 
+                            </div> 
+                    )} 
+                </div> 
+            ); 
 
         case 'divider':
             return <hr style={{ borderTop: '1px solid #ccc' }} />;
 
         case 'gap':
             return <div style={{ height: '10px' }} />;
-
+            
         default:
             return <div>Unknown component type: {type}</div>;
     }

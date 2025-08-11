@@ -1,4 +1,4 @@
-import { useState } from 'react'; 
+import { useState, useEffect } from 'react'; 
 import { DndProvider } from 'react-dnd'; 
 import { HTML5Backend } from 'react-dnd-html5-backend'; 
 import Toolbox from './Toolbox'; 
@@ -107,22 +107,22 @@ const ContentBuilder = () => {
     const [previewMode, setPreviewMode] = useState(false);
 
     // retrieve from backend
-    // useEffect(() => {
-    //     const fetchBlocks = async () => {
-    //         try {
-    //             // retrieve from database
-    //             const res = await fetch(`http://localhost:8000/api/pages/`);
-    //             if (!res.ok) throw new Error('Backend fetch failed');
-    //             const data = await res.json();
-    //             const parsed = typeof data.content === 'string' ? JSON.parse(data.content) : data.content;
-    //             setBlocks(parsed || []);
-    //             // localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parsed || [])); // sync to localStorage
-    //         } catch (err) {
-    //         }
-    //     };
+    useEffect(() => {
+        const fetchBlocks = async () => {
+            try {
+                // retrieve from database
+                const res = await fetch(`http://localhost:8000/api/pages/`);
+                if (!res.ok) throw new Error('Backend fetch failed');
+                const data = await res.json();
+                const parsed = typeof data.content === 'string' ? JSON.parse(data.content) : data.content;
+                setBlocks(parsed || []);
+                // localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(parsed || [])); // sync to localStorage
+            } catch (err) {
+            }
+        };
 
-    //     fetchBlocks();
-    // }, []);
+        fetchBlocks();
+    }, []);
 
 
     // const loadFromBackend = async () => {
