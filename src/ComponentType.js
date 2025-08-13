@@ -11,6 +11,60 @@ const ComponentType = ({ block, updateBlock, type, content = '', isEditing, prev
         </>
     );
 
+    const renderImageFile = () => (
+        <input
+            type="file"
+            onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        updateBlock(block.id, {
+                            content: {
+                                src: event.target.result
+                            }
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }}
+        />
+    );
+
+    const renderImageSize = () => (
+        <>
+            <div>
+                <label>Width (px): </label>
+                <input
+                    type="number"
+                    value={content?.width || ''}
+                    onChange={(e) =>
+                        onChange({
+                            ...content,
+                            width: parseInt(e.target.value, 10) || null
+                        })
+                    }
+                />
+            </div>
+
+            <div>
+                <label>Height (px): </label>
+                <input
+                    type="number"
+                    value={content?.height || ''}
+                    onChange={(e) =>
+                        onChange({
+                            ...content,
+                            height: parseInt(e.target.value, 10) || null
+                        })
+                    }
+                />
+            </div>
+
+            <div><button onClick={onSave}>Save</button></div>
+        </>
+    );
+
     switch (type) {
         case 'text':
             return isEditing ? renderTextarea() : (
@@ -97,7 +151,8 @@ const ComponentType = ({ block, updateBlock, type, content = '', isEditing, prev
             );
 
         case 'subheader':
-            return isEditing ? renderTextarea() : (
+            return isEditing ? renderTextarea() : 
+            (
                 <div
                     onClick={() => !previewMode && setIsEditing(true)}
                     style={{
@@ -111,30 +166,34 @@ const ComponentType = ({ block, updateBlock, type, content = '', isEditing, prev
                 </div>
             );
 
-        case 'image': 
-            return ( 
-                <div> 
-                    {content ? ( 
-                        <img src={content} alt="Content" style={{ maxWidth: '100%' }} /> ) : ( 
-                            <div> 
-                                <input 
-                                type="file" 
-                                onChange={(e) => { 
-                                    const file = e.target.files[0]; 
-                                    if (file) { 
-                                        const reader = new FileReader(); 
-                                        reader.onload = (event) => { 
-                                            updateBlock(block.id, { content: event.target.result }); 
-                                            // updateBlock(id, { content: event.target.result }); 
-                                        }; 
-                                        reader.readAsDataURL(file); 
-                                    } 
-                                }} 
-                                /> 
-                            </div> 
-                    )} 
-                </div> 
-            ); 
+        case 'image':
+            return (
+                <div>
+                    {isEditing ? (
+                        <>
+                            {renderImageFile()}
+                            {renderImageSize()}
+                        </>
+                    ) : (
+                        <div onClick={() => !previewMode && setIsEditing(true)}>
+                            {content ? (
+                                <img
+                                    src={content.src}
+                                    alt="Content"
+                                    style={{
+                                        maxWidth: '100%',
+                                        width: content.width ? `${content.width}px` : '100%',
+                                        height: content.height ? `${content.height}px` : 'auto'
+                                    }}
+                                />
+                            ) : (
+                                <div style={{ color: '#888' }}>Click to add image</div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+
 
         case 'divider':
             return <hr style={{ borderTop: '1px solid #ccc' }} />;

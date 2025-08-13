@@ -167,19 +167,19 @@ const ContentBuilder = () => {
                         <button 
                             style={{ marginTop: '10px' }} 
                             onClick={clearPage}>
-                                Clear Page
+                                Clear
                         </button>
 
                         <button 
                             style={{ marginTop: '10px' }} 
                             onClick={saveToBackend}>
-                                Save to Backend
+                                Save
                         </button>
 
                         <button 
                             style={{ marginTop: '10px' }} 
                             onClick={loadFromBackend}>
-                                Load from Backend
+                                Load
                         </button>
                     </div>
                 </SideContainer>
