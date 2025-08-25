@@ -1,3 +1,5 @@
+import Canvas from "./Canvas";
+
 const ComponentType = ({ block, updateBlock, type, content = '', isEditing, previewMode, setIsEditing, onSave, onChange, handleSave }) => {
 
     const renderTextarea = () => (
@@ -65,104 +67,265 @@ const ComponentType = ({ block, updateBlock, type, content = '', isEditing, prev
         </>
     );
 
+    const renderTextEdit = () => (
+        <>
+            <div
+                onClick={() => !previewMode && setIsEditing(true)}
+                style={{
+                    color: 'gray',
+                    fontSize: '15px',
+                    fontWeight: 'normal',
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                }}
+            >
+                Click to edit
+            </div>
+
+        </>
+    );
+
+    const column = () => (
+        <>
+            <div 
+            style={{             
+                width: '100%',
+                minHeight: '150px',
+                border: '1px dashed #aaa',
+                padding: '10px',
+                margin: '10px 0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f9f9f9',
+                color: "gray"
+            }}>
+                Column
+            </div>
+        </>
+    );
+
+    const row = () => (
+        <>
+            <div 
+            style={{             
+                width: '100%',
+                height: '30px',
+                border: '1px dashed #aaa',
+                padding: '10px',
+                margin: '10px 0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f9f9f9',
+                color: "gray"
+
+            }}>
+                Row
+            </div>
+        </>
+    );
+
     switch (type) {
         case 'text':
-            return isEditing ? renderTextarea() : (
-                <div
-                    onClick={() => !previewMode && setIsEditing(true)}
-                    style={{ textAlign: 'left' }}
-                >
-                    {content}
-                </div>
-            );
+            return (
+                <div>
+                    {isEditing ? (
+                        <>{renderTextarea()}</>
+                    ) : (
+                        <>
+                            {content ? (
+                                <div
+                                    onClick={() => !previewMode && setIsEditing(true)}
+                                    style={{ textAlign: 'left', }}
+                                >
+                                    {content}
+                                </div>
+                            ) : (
+                                <>{renderTextEdit()}</>
+                            )}
+                        </>
+                    )}                
+                    </div>
 
+            );
+            
         case 'boldtext':
-            return isEditing ? renderTextarea() : (
-                <div
-                    onClick={() => !previewMode && setIsEditing(true)}
-                    style={{ fontWeight: 'bold', textAlign: 'left' }}
-                >
-                    {content}
+            return (
+                 <div>
+                    {isEditing ? (
+                        <>{renderTextarea()}</>
+                    ) : (
+                    <>
+                        {content ? (
+                            <div
+                                onClick={() => !previewMode && setIsEditing(true)}
+                                style={{ fontWeight: 'bold', textAlign: 'left' }}
+                            >
+                                {content}
+                            </div>
+                        ) : (
+                            <>{renderTextEdit()}</>
+                        )}
+                    </>
+            )}
                 </div>
-            );
-
+        );
+            
         case 'italictext':
-            return isEditing ? renderTextarea() : (
-                <div
-                    onClick={() => !previewMode && setIsEditing(true)}
-                    style={{ fontStyle: 'italic', textAlign: 'left' }}
-                >
-                    {content}
-                </div>
+            return (
+                <div>
+                    {isEditing ? (
+                        <>{renderTextarea()}</>
+                    ) : (
+                        <>
+                            {content ? (
+                                <div
+                                    onClick={() => !previewMode && setIsEditing(true)}
+                                    style={{ fontStyle: 'italic', textAlign: 'left' }}                                
+                                >
+                                    {content}
+                                </div>
+                            ) : (
+                                <>{renderTextEdit()}</>
+                            )}
+                        </>
+                    )}                
+                    </div>
+
             );
 
         case 'bulletpoints':
-            return isEditing ? renderTextarea() : (
-                <ul
-                    onClick={() => !previewMode && setIsEditing(true)}
-                    style={{ textAlign: 'left', paddingLeft: '20px', margin: 0 }}
-                >
-                    {content.split('\n').map((line, index) => (
-                        <li key={index}>{line}</li>
-                    ))}
-                </ul>
+            return (
+                <div>
+                    {isEditing ? (
+                        <>{renderTextarea()}</>
+                    ) : (
+                        <>
+                            {content ? (
+                                <ul
+                                    onClick={() => !previewMode && setIsEditing(true)}
+                                    style={{ textAlign: 'left', paddingLeft: '20px', margin: 0 }}
+                                >
+                                    {content.split('\n').map((line, index) => (
+                                        <li key={index}>{line}</li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <>{renderTextEdit()}</>
+                            )}
+                        </>
+                    )}                
+                    </div>
+
             );
 
         case 'numberedlist':
-            return isEditing ? renderTextarea() : (
-                <ol
-                    onClick={() => !previewMode && setIsEditing(true)}
-                    style={{ textAlign: 'left', paddingLeft: '20px', margin: 0 }}
-                >
-                    {content.split('\n').map((line, index) => (
-                        <li key={index}>{line}</li>
-                    ))}
-                </ol>
+            return (
+                <div>
+                    {isEditing ? (
+                        <>{renderTextarea()}</>
+                    ) : (
+                        <>
+                            {content ? (
+                                <ol
+                                    onClick={() => !previewMode && setIsEditing(true)}
+                                    style={{ textAlign: 'left', paddingLeft: '20px', margin: 0 }}
+                                >
+                                    {content.split('\n').map((line, index) => (
+                                        <li key={index}>{line}</li>
+                                    ))}
+                                </ol>
+                            ) : (
+                                <>{renderTextEdit()}</>
+                            )}
+                        </>
+                    )}                
+                    </div>
             );
-
+        
         case 'title':
-            return isEditing ? renderTextarea() : (
-                <div
-                    onClick={() => !previewMode && setIsEditing(true)}
-                    style={{
-                        fontSize: '26px',
-                        fontWeight: 'bold',
-                        textAlign: 'left',
-                        textDecoration: 'underline',
-                    }}
-                >
-                    {content}
+            return (
+                <div>
+                    {isEditing ? (
+                        <>{renderTextarea()}</>
+                    ) : (
+                        <>
+                            {content ? (
+                                <div
+                                    onClick={() => !previewMode && setIsEditing(true)}
+                                    style={{
+                                        fontSize: '26px',
+                                        fontWeight: 'bold',
+                                        textAlign: 'left',
+                                        textDecoration: 'underline',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    {content}
+                                </div>
+                            ) : (
+                                <>{renderTextEdit()}</>
+                            )}
+                        </>
+                    )}
+
                 </div>
             );
-
+            
         case 'header':
-            return isEditing ? renderTextarea() : (
-                <div
-                    onClick={() => !previewMode && setIsEditing(true)}
-                    style={{
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        textAlign: 'left',
-                        textDecoration: 'underline',
-                    }}
-                >
-                    {content}
+            return (
+                <div>
+                    {isEditing ? (
+                        <>{renderTextarea()}</>
+                    ) : (
+                        <>
+                            {content ? (
+                                <div
+                                    onClick={() => !previewMode && setIsEditing(true)}
+                                    style={{
+                                        fontSize: '20px',
+                                        fontWeight: 'bold',
+                                        textAlign: 'left',
+                                        textDecoration: 'underline',
+                                    }}
+                                >
+                                    {content}
+                                </div>
+                            ) : (
+                                <>{renderTextEdit()}</>
+                            )}
+                        </>
+                    )}
+
                 </div>
             );
 
         case 'subheader':
-            return isEditing ? renderTextarea() : 
-            (
-                <div
-                    onClick={() => !previewMode && setIsEditing(true)}
-                    style={{
-                        fontSize: '16px',
-                        fontWeight: 'bold',
-                        textAlign: 'left',
-                        textDecoration: 'underline',
-                    }}
-                >
-                    {content}
+            return (
+                <div>
+                    {isEditing ? (
+                        <>{renderTextarea()}</>
+                    ) : (
+                        <>
+                            {content ? (
+                                <div
+                                    onClick={() => !previewMode && setIsEditing(true)}
+                                    style={{
+                                        fontSize: '16px',
+                                        fontWeight: 'bold',
+                                        textAlign: 'left',
+                                        textDecoration: 'underline',
+                                    }}
+                                >
+                                    {content}
+                                </div>
+                            ) : (
+                                <>{renderTextEdit()}</>
+                            )}
+                        </>
+                    )}
+
                 </div>
             );
 
@@ -194,13 +357,47 @@ const ComponentType = ({ block, updateBlock, type, content = '', isEditing, prev
                 </div>
             );
 
-
         case 'divider':
             return <hr style={{ borderTop: '1px solid #ccc' }} />;
 
         case 'gap':
             return <div style={{ height: '10px' }} />;
             
+        case '1column':
+            return (
+                <>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        {column()} 
+                    </div>
+                </>
+            );
+        
+        case '2column':
+            return (
+                <> 
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        {column()} 
+                        {column()}
+                    </div>
+                </>
+            );
+            
+        case '3column':
+            return (
+                <> 
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        {column()} 
+                        {column()}
+                        {column()}
+                    </div>
+                </>
+            );
+
+        case 'row':
+            return (
+                <>{row()}</>
+            );
+
         default:
             return <div>Unknown component type: {type}</div>;
     }

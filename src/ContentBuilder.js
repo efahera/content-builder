@@ -16,7 +16,12 @@ const SideContainer = styled.div`
     min-height: 100%; 
 `; 
 
-// const LOCAL_STORAGE_KEY = `content_blocks_page_${PAGE_ID}`;
+const ToolboxContainer = styled.div` 
+    // padding: 20px; 
+    background: #e9e9e9; 
+    min-height: 100%; 
+    // width: 350px;
+`; 
 
 const ContentBuilder = () => { 
     const [blocks, setBlocks] = useState([]);
@@ -43,7 +48,6 @@ const ContentBuilder = () => {
         setBlocks(blocks.filter(block => block.id !== id)); 
     }; 
 
-    // clear page on backend
     const clearPage = async () => {
         setBlocks([]);
         // localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -124,28 +128,11 @@ const ContentBuilder = () => {
         fetchBlocks();
     }, []);
 
-
-    // const loadFromBackend = async () => {
-    //     try {
-    //         await fetch(`http://localhost:8000/api/pages/`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //         });
-            
-    //         console.log("Retrieved blocks:", blocks);
-    //         alert("Page retrieved!");
-
-    //     } catch (err) {
-    //         console.error("Error retrieving page:", err);
-    //     }
-    // };
-
     return ( 
         <DndProvider backend={HTML5Backend}> 
             <BuilderContainer> 
                 <Toolbox /> 
+                <ToolboxContainer></ToolboxContainer>
                 <Canvas 
                 blocks={blocks}  
                 addBlock={addBlock}
@@ -180,6 +167,14 @@ const ContentBuilder = () => {
                             style={{ marginTop: '10px' }} 
                             onClick={loadFromBackend}>
                                 Load
+                        </button>
+
+                        {/* FOR TEMPORARY */}
+                        <button 
+                            style={{ marginTop: '10px' }} 
+                            onClick={() => window.open("http://localhost:8000/api/pages/", "_blank")}
+                        >
+                            Backend
                         </button>
                     </div>
                 </SideContainer>
