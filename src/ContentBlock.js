@@ -53,6 +53,12 @@ const ContentBlock = ({ block, index, moveBlock, updateBlock, removeBlock, previ
         collect: (monitor) => ({ 
             isDragging: monitor.isDragging(), 
         }), 
+        // type: "block",
+        // item: { id: block.id },
+        // collect: (monitor) => ({
+        // isDragging: monitor.isDragging(),
+        // }),
+
     }); 
    
     const [, drop] = useDrop({ 

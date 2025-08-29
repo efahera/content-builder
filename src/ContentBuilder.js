@@ -49,6 +49,10 @@ const ContentBuilder = () => {
     }; 
 
     const clearPage = async () => {
+        const confirmClear = window.confirm("This action cannot be undone. Do you want to continue?");
+        if (!confirmClear) {
+            return;
+        }
         setBlocks([]);
         // localStorage.removeItem(LOCAL_STORAGE_KEY);
 
@@ -61,6 +65,7 @@ const ContentBuilder = () => {
                 content: [],
             }),
         });
+            alert("Page cleared!");
         } catch (error) {
             console.error('Failed to clear on backend:', error);
         }

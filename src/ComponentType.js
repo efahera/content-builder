@@ -1,4 +1,12 @@
-import Canvas from "./Canvas";
+// import Canvas from "./Canvas";
+import ContentBlock from "./ContentBlock";
+
+// const InnerDropArea = styled.div`
+//     min-height: 200px;
+//     border: ${(props) => props.$isOver ? '2px dashed #1890ff' : '2px dashed #ddd'};
+//     background: ${(props) => props.$isOver ? 'rgba(24, 144, 255, 0.1)' : 'white'};
+//     padding: 50px;
+// `;
 
 const ComponentType = ({ block, updateBlock, type, content = '', isEditing, previewMode, setIsEditing, onSave, onChange, handleSave }) => {
 
@@ -364,38 +372,70 @@ const ComponentType = ({ block, updateBlock, type, content = '', isEditing, prev
             return <div style={{ height: '10px' }} />;
             
         case '1column':
-            return (
-                <>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        {column()} 
-                    </div>
-                </>
-            );
+            // return (
+            //     <>
+            //         <div style={{ display: 'flex', gap: '10px' }}>
+            //             {column()} 
+            //         </div>
+            //     </>
+            // );
         
-        case '2column':
             return (
-                <> 
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        {column()} 
-                        {column()}
-                    </div>
-                </>
+                <div className="flex flex-col gap-2">
+                    {block.children?.map((child) => (
+                        <ContentBlock key={child.id} block={child} />
+                    ))}
+                </div>
             );
+
+        case '2column':
+            // return (
+            //     <> 
+            //         <div style={{ display: 'flex', gap: '10px' }}>
+            //             {column()} 
+            //             {column()}
+            //         </div>
+            //     </>
+            // );
             
-        case '3column':
             return (
-                <> 
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        {column()} 
-                        {column()}
-                        {column()}
-                    </div>
-                </>
+                <div className="grid grid-cols-2 gap-4">
+                    {block.children?.map((child, idx) => (
+                        <ContentBlock key={child.id || idx} block={child} />
+                    ))}
+                </div>
+            );
+
+        case '3column':
+            // return (
+            //     <> 
+            //         <div style={{ display: 'flex', gap: '10px' }}>
+            //             {column()} 
+            //             {column()}
+            //             {column()}
+            //         </div>
+            //     </>
+            // );
+
+            return (
+                <div className="grid grid-cols-3 gap-4">
+                    {block.children?.map((child, idx) => (
+                        <ContentBlock key={child.id || idx} block={child} />
+                    ))}
+                </div>
             );
 
         case 'row':
+            // return (
+            //     <>{row()}</>
+            // );
+
             return (
-                <>{row()}</>
+                <div className="flex flex-row gap-2">
+                    {block.children?.map((child) => (
+                        <ContentBlock key={child.id} block={child} />
+                    ))}
+                </div>
             );
 
         default:
